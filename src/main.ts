@@ -1,5 +1,3 @@
-import { createServer } from "http";
-import { readFileSync } from "fs";
 import { WebSocket, WebSocketServer } from "ws";
 
 enum State {
@@ -11,8 +9,7 @@ enum State {
 let cobblestoneState = State.UNKNOWN;
 let openWebSockets: WebSocket[] = [];
 
-const server = createServer();
-const wss = new WebSocketServer({ server });
+const wss = new WebSocketServer({ noServer: true });
 
 wss.on("connection", function connection(ws) {
   ws.on("error", console.error);
@@ -41,10 +38,6 @@ wss.on("connection", function connection(ws) {
   });
 
   openWebSockets.push(ws);
-});
-
-server.listen(8080, () => {
-  console.log("Web socket server started on http://localhost:8080");
 });
 
 function turnOffCobblestoneGenerator() {
@@ -87,6 +80,12 @@ app.get("/state", (_req, res) => {
   res.send(cobblestoneState);
 });
 
-app.listen(8081, () => {
-  console.log("Web server started on http://localhost:8081");
+const server = app.listen(8080, () => {
+  console.log("Web server started on http://0.0.0.0:8080");
+});
+
+server.on("upgrade", (request, socket, head) => {
+  wss.handleUpgrade(request, socket, head, (ws) => {
+    wss.emit("connection", ws, request);
+  });
 });
