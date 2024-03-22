@@ -1,4 +1,4 @@
-local myURL = "wss://constantly-comparisons-billing-query.trycloudflare.com"
+local myURL = "wss://sea-turtle-app-f38lv.ondigitalocean.app/"
 http.websocketAsync(myURL)
 local event, url, handle
 repeat
